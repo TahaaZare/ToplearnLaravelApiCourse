@@ -20,7 +20,7 @@ class AuthApiController extends Controller
         $newUser = User::create($validated);
 
         //create token
-        $token = $newUser->createToken("{$newUser->email}-register-token")->plainTextToken;
+        $token = $newUser->createToken("{$newUser->email}-register-token",["*"],now()->addDays(30))->plainTextToken;
 
         return response()->json([
             'message' => 'User registered successfully',
@@ -34,15 +34,15 @@ class AuthApiController extends Controller
 
         $user = User::where('email', $validated['email'])->first();
 
-        if(!Hash::check($validated['password'], $user->password)){
+        if (!Hash::check($validated['password'], $user->password)) {
             return response()->json([
                 'message' => 'Wrong password',
-            ],403);
+            ], 403);
         }
 
         //delete tokens
 //        $user->tokens()->delete();
-        $user->tokens()->where('name',"{$user->email}-register-token")->delete();
+        $user->tokens()->where('name', "{$user->email}-register-token")->delete();
 
         //create token
         $token = $user->createToken("{$user->email}-login-token")->plainTextToken;
